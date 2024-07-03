@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>João Paulo Calculadora de Juros Composto</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calculator">
+        <h1>João Paulo Calculadora de Juros Composto</h1>
+        <label for="initialAmount">Valor Inicial (R$):</label>
+        <input type="number" id="initialAmount" required>
+        
+        <label for="monthlyContribution">Aportes Mensais (R$):</label>
+        <input type="number" id="monthlyContribution" required>
+        
+        <label for="interestRate">Taxa de Juros (%):</label>
+        <input type="number" id="interestRate" step="0.01" required>
+        
+        
+        <label for="interestRateType">Tipo de Taxa:</label>
+        <select id="interestRateType" required>
+            <option value="monthly">Mensal</option>
+            <option value="annual">Anual</option>
+        </select>
+        
+        <label for="period">Período:</label>
+        <select id="periodType" required>
+            <option value="months">Meses</option>
+            <option value="years">Anos</option>
+        </select>
+        <input type="number" id="period" required>
+        
+        <button onclick="calculate()">Calcular</button>
+        <button onclick="clearForm()">Limpar</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function calculate() {
+            const initialAmount = parseFloat(document.getElementById('initialAmount').value);
+            const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+            const interestRateType = document.getElementById('interestRateType').value;
+            const periodType = document.getElementById('periodType').value;
+            let period = parseInt(document.getElementById('period').value);
+
+            if (interestRateType === 'annual') {
+                interestRate /= 12; // Convert annual rate to monthly
+            }
+
+            if (periodType === 'years') {
+                period = period * 12; // Convert years to months
+            }
+
+            let balance = initialAmount;
+            let labels = [];
+            let data = [];
+            
+            for (let i = 1; i <= period; i++) {
+                balance += monthlyContribution;
+                balance *= (1 + interestRate);
+                labels.push(`Mês ${i}`);
+                data.push(balance.toFixed(2));
+            }
+
+            document.getElementById('result').innerText = `Valor Final: R$ ${balance.toFixed(2)}`;
+            updateChart(labels, data);
+        }
+
+        function clearForm() {
+            document.getElementById('initialAmount').value = '';
+            document.getElementById('monthlyContribution').value = '';
+            document.getElementById('interestRate').value = '';
+            document.getElementById('period').value = '';
+            document.getElementById('result').innerText = '';
+            updateChart([], []);
+        }
+
+        function updateChart(labels, data) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Rentabilidade',
+                        data: data,
+                        borderColor: 'rgba(0, 0, 255, 1)',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
